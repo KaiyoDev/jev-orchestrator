@@ -64,7 +64,16 @@ Pi auto-loads this directory because its `package.json` declares the entry:
 "pi": { "extensions": ["extensions/index.ts"] }
 ```
 
-Place it at `~/.pi/agent/extensions/jev-orchestrator` (this repo's home) — no build step (TypeScript is transpiled by Pi's jiti loader). The `pi-typesafe` extension must be installed and logged in (`/login typesafe` → TypeSafe API key; OpenRouter / Vercel AI Gateway also supported).
+Two ways to install:
+
+```bash
+# A. as a pi package — pi also installs the pi-typesafe dependency (declared in package.json):
+pi install git:github.com/KaiyoDev/jev-orchestrator
+
+# B. local directory (this repo's home): pi auto-loads it from ~/.pi/agent/extensions/;
+#    install the dependency once:  pi install npm:pi-typesafe
+```  
+No build step (TypeScript is transpiled by Pi's jiti loader). If pi-typesafe is missing at runtime the extension toasts the exact install command; you can also run **`/jev-orch install-deps`** to install it and retry the judge in-process. Login: `/login typesafe` (or OpenRouter / Vercel AI Gateway).
 
 Config file: `~/.pi/agent/jev-orchestrator.json` (global, new sessions). All fields:
 
@@ -96,6 +105,7 @@ Config file: `~/.pi/agent/jev-orchestrator.json` (global, new sessions). All fie
 | `/jev-orch debug` | live TUI widget: stage, last verdict, evidence size |
 | `/jev-orch status` | episode detail (task, shape, category, branches, failLoops, budget) |
 | `/jev-orch clear` | drop the episode (stops any loop instantly) |
+| `/jev-orch install-deps` | install the missing pi-typesafe dependency and retry the judge in-process |
 | `/jev-orch new-task` | start a fresh episode |
 
 ## Verifying
