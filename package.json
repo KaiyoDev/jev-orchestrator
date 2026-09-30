@@ -1,9 +1,25 @@
 {
   "name": "jev-orchestrator",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Adaptive task orchestration for Pi: Jev (typesafe) typed judgments drive ROUTE / CHECK / FINAL with per-category completion contracts, bounded correction loops, and tunable request budgets.",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KaiyoDev/jev-orchestrator.git"
+  },
+  "keywords": [
+    "pi-extension",
+    "pi-package",
+    "pi-typesafe",
+    "jev",
+    "orchestrator",
+    "agent",
+    "coding-agent"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "pi-typesafe": "^0.8.0"
   },
