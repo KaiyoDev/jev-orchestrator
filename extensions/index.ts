@@ -29,7 +29,11 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { loadConfig, persistConfig, JevOrchConfig } from "../src/config.js";
 import { CUSTOM_TYPE, loadOrchState, newOrchState, saveOrchState, OrchState } from "../src/state.js";
-import { makeJev, JevAsk } from "../src/jev.js";
+import { makeJev, JevAsk, TYPESAFE_INSTALL_CMD, isMissingDependency } from "../src/jev.js";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileP = promisify(execFile);
 import { ROUTE_QUESTIONS, decideRoute, routeDirective } from "../src/router.js";
 import { CHECK_QUESTIONS, finalQuestions, decideCheck, decideFinal, buildFinalEvidence, sessionEntriesToMessages, retryLeftFor } from "../src/checker.js";
 
@@ -128,6 +132,9 @@ export default function registerJevOrchestrator(pi: ExtensionAPI): void {
     if (!rt.on) return; // fully inert when disabled: no judge, no state read, nothing
     rt.jev = await makeJev(cfg);
     rt.state = loadOrchState(ctx);
+    if (!rt.jev.available() && isMissingDependency(rt.jev)) {
+      ctx.ui.notify?.(`jev-orch: Jev unavailable — pi-typesafe is missing. Fix: ${TYPESAFE_INSTALL_CMD} (applies to new sessions) or /jev-orch install-deps (this session).`, "warning");
+    }
     if (cfgErr) trace(ctx, `config warning: ${cfgErr}`);
     trace(ctx, `session_start (config source=${source}, child=${IS_CHILD})`);
   });
@@ -310,6 +317,7 @@ export default function registerJevOrchestrator(pi: ExtensionAPI): void {
     { value: "debug", description: "TUI live panel + stage toasts (on/off/toggle)" },
     { value: "global", description: "persist on/off/shadow/enforce/budget to the global config file" },
     { value: "budget", description: "show or set the Jev request budget for this session (/jev-orch budget N)" },
+    { value: "install-deps", description: "install the missing pi-typesafe dependency and retry the judge" },
     { value: "clear", description: "clear episode state" },
   ];
   pi.registerCommand("jev-orch", {
@@ -402,6 +410,26 @@ export default function registerJevOrchestrator(pi: ExtensionAPI): void {
           if (sub !== "") rt.jev?.setMaxRequests(n);
           refreshPanel(ctx);
           notify(`jev-orch budget: ${rt.jev?.budgetUsed ?? 0}/${rt.jev?.maxRequests ?? cfg.maxRequests} used this session${sub ? ` (limit now ${n}, this session only)` : ""}. Change other sessions: /jev-orch global budget ${n || (rt.jev?.maxRequests ?? cfg.maxRequests)}`);
+          break;
+        }
+        case "install-deps": {
+          if (rt.jev?.available()) {
+            notify("pi-typesafe already available (key=" + rt.jev.keyLabel + "); nothing to install.");
+            break;
+          }
+          try {
+            const bin = process.platform === "win32" ? "pi.cmd" : "pi";
+            const { stdout, stderr } = await execFileP(bin, ["install", "npm:pi-typesafe"], { timeout: 120000, maxBuffer: 1024 * 1024 });
+            const ready = await rt.jev?.retryLoad?.() ?? false;
+            if (ready) {
+              notify("pi-typesafe installed — judge ready (key=" + rt.jev?.keyLabel + ").");
+            } else {
+              const tail = String(stdout || stderr || "").trim().slice(0, 200);
+              notify("install finished but judge is not ready yet" + (tail ? " — " + tail : "") + "; retry /jev-orch install-deps or /reload.");
+            }
+          } catch (e) {
+            notify("install failed: " + String(e instanceof Error ? e.message : e).slice(0, 200) + " — manual: " + TYPESAFE_INSTALL_CMD);
+          }
           break;
         }
         case "debug": {
