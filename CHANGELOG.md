@@ -2,6 +2,12 @@
 
 All notable changes to jev-orchestrator.
 
+## 0.3.1 — 2026-09-30
+
+- **Declare the pi-typesafe dependency** in `package.json` so `pi install` (npm/git sources) installs it automatically.
+- **`/jev-orch install-deps`**: installs pi-typesafe (`pi install npm:pi-typesafe`) and retries the judge in-process (`JevAsk.retryLoad`); when the dependency is missing at `session_start` the extension toasts the exact install command; the "unavailable" message is now actionable.
+- Tests: +5 asserts (install-deps helpers); total 60, tsc strict clean.
+
 ## 0.3.0 — 2026-09-30
 
 - **Fix loop-after-escalate**: `state.finalClosed` terminal flag — the FINAL stage no longer re-fires on later settles after the escalation (one "limit reached" injection, then closed). Incident: session 01a0f0d0 (5× byte-identical verdicts, runaway escalate).
