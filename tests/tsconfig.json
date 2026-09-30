@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": [],
+    "paths": {
+      "@earendil-works/pi-coding-agent": ["D:/npm-global/node_modules/@earendil-works/pi-coding-agent/dist/index.d.ts"],
+      "jiti": ["C:/Users/Admin/node_modules/jiti"],
+      "pi-typesafe": ["C:/Users/Admin/.pi/agent/npm/node_modules/pi-typesafe/dist/index.d.ts"]
+    }
+  },
+  "files": [
+    "../extensions/index.ts",
+    "../src/checker.ts",
+    "../src/config.ts",
+    "../src/router.ts",
+    "../src/state.ts",
+    "../src/jev.ts"
+  ]
+}
