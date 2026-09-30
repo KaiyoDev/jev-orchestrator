@@ -3,3 +3,5 @@ node_modules/
 .DS_Store
 # scratch probe (pre-project)
 jev-probe-tmp.ts
+# local runtime artifacts (pi session state inside this cwd)
+.pi/
