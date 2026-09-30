@@ -1,0 +1,27 @@
+{
+  "name": "jev-orchestrator",
+  "version": "0.3.0",
+  "description": "Adaptive task orchestration for Pi: Jev (typesafe) typed judgments drive ROUTE / CHECK / FINAL with per-category completion contracts, bounded correction loops, and tunable request budgets.",
+  "type": "module",
+  "license": "MIT",
+  "pi": {
+    "extensions": [
+      "extensions/index.ts"
+    ]
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tests/tsconfig.json",
+    "test": "node tests/regress.mts && node tests/final-category-tests.mts && node tests/evidence-tests.mts && node tests/session-msgs-tests.mts"
+  },
+  "files": [
+    "extensions/",
+    "src/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "docs/"
+  ]
+}
