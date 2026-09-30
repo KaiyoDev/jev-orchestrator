@@ -108,6 +108,15 @@ Config file: `~/.pi/agent/jev-orchestrator.json` (global, new sessions). All fie
 | `/jev-orch install-deps` | install the missing pi-typesafe dependency and retry the judge in-process |
 | `/jev-orch new-task` | start a fresh episode |
 
+## Dependencies & related projects
+
+| Project | Role | Link |
+|---|---|---|
+| [pi-typesafe](https://github.com/DevMortimer/pi-typesafe) | **Required dependency** — the Jev/TypeSafe judgment layer that powers ROUTE / CHECK / FINAL (choice/score/noul verdicts with probabilities). Install once: `pi install npm:pi-typesafe` (or let `pi install` of this package pull it in — declared in `dependencies`), then log in: `/login typesafe`. | https://github.com/DevMortimer/pi-typesafe |
+| [pi-coding-agent](https://github.com/earendil-works/pi) | Host runtime — Pi loads this extension through its package manifest (`pi.extensions`) and supplies the hooks, session store and UI the orchestrator builds on. | https://www.npmjs.com/package/@earendil-works/pi-coding-agent |
+
+The orchestrator itself ships **no** judgment model — all task intelligence (shape, category, gaps, acceptance) comes from pi-typesafe verdicts, so upgrading that project directly changes behavior here; pin via `dependencies` in `package.json`.
+
 ## Verifying
 
 ```bash
