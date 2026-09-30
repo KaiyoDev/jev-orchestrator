@@ -50,10 +50,20 @@ export interface JevAsk {
   /** Session request budget in effect (mutable via setMaxRequests). */
   maxRequests: number;
   setMaxRequests: (n: number) => void;
+  /** Re-resolve pi-typesafe and re-init the judge (used after installing the dependency). */
+  retryLoad: () => Promise<boolean>;
 }
 
 let modCache: TypesafeModule | null | undefined;
 let loadError: unknown;
+
+/** Exact command that installs the required dependency (pure — unit-testable). */
+export const TYPESAFE_INSTALL_CMD = "pi install npm:pi-typesafe";
+
+/** True when the judge failed because pi-typesafe itself cannot be resolved (not auth/key issues). */
+export function isMissingDependency(jev: JevAsk | undefined): boolean {
+  return !!jev && !jev.available() && jev.reason() === "unavailable" && jev.keyLabel === "unknown";
+}
 
 async function loadTypesafe(): Promise<TypesafeModule | null> {
   if (modCache !== undefined) return modCache;
@@ -90,11 +100,11 @@ async function loadTypesafe(): Promise<TypesafeModule | null> {
 }
 
 export async function makeJev(cfg: JevOrchConfig): Promise<JevAsk> {
-  const mod = await loadTypesafe();
+  let mod = await loadTypesafe();
   const rt = {
     ok: false,
     reason: "unavailable" as JevFailReason,
-    message: "pi-typesafe module not resolvable",
+    message: "pi-typesafe not resolvable — install it (pi install npm:pi-typesafe) or run /jev-orch install-deps",
     budgetUsed: 0,
     lastAt: 0,
     keyLabel: "unknown",
@@ -197,6 +207,15 @@ export async function makeJev(cfg: JevOrchConfig): Promise<JevAsk> {
     get maxRequests() { return budgetLimit; },
     setMaxRequests(n: number) {
       if (Number.isFinite(n) && n >= 1) budgetLimit = Math.floor(n);
+    },
+    async retryLoad(): Promise<boolean> {
+      // force re-resolution of pi-typesafe, then re-init the judge with the fresh module
+      modCache = undefined;
+      loadError = undefined;
+      mod = await loadTypesafe();
+      if (!mod) return false;
+      judge = undefined;
+      return ensureJudge();
     },
   };
 }
